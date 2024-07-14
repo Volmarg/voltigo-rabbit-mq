@@ -1,0 +1,30 @@
+FROM rabbitmq:3-management-alpine
+
+# that's gonna be default user used to access the amqp from gui + can be used to connect from other projects
+ENV RABBITMQ_DEFAULT_USER=rabbitmq
+ENV RABBITMQ_DEFAULT_PASS='(*uHBgh87*^9-0sd76)'
+
+# Should be disabled for safety!
+RUN rabbitmq-plugins disable rabbitmq_management;
+
+# These are needed for nagios monitoring
+RUN apk add perl;
+RUN apk add perl-utils;
+RUN apk add monitoring-plugins;
+RUN apk add curl;
+RUN apk add wget;
+RUN apk add make;
+
+# cpanm takes LONG to handle!
+RUN apk add perl-app-cpanminus;
+RUN cpanm install JSON;
+
+# Sooo... this block is kinda wicked but explaining:
+# - rabbitmq comes with it's own entrypoint.sh and overwriting it causes issues, bunch of weird errors etc.
+# - tried using the definitions.json but this also fails,
+# - what works here is:
+#   - starting rabbit server
+#     - once CMD is added the rabbit server won't start itself
+#   - waiting for rabbit server to start (thus sleep)
+#   - then running endlessly in while loop because otherwise container dies when cmd is executed
+CMD rabbitmq-server -detached && sleep 10 && rabbitmqctl set_policy remove-generic amq.gen* '{"expires": 1}' --priority 0 --apply-to queues && while true; do sleep 1; done;

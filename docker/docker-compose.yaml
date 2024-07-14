@@ -1,0 +1,23 @@
+version: "3.2"
+services:
+  rabbitmq:
+    build: .
+    container_name: 'rabbitmq'
+    # Start the container every time that pc is restarted
+    restart: always
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq
+      - /var/log/docker/container/rabbitmq:/var/log/rabbitmq
+      - ./container-data/rabbitmq/conf.d/11-overwrite.conf:/etc/rabbitmq/conf.d/11-overwrite.conf
+      - /usr/lib/nagios/plugins:/usr/lib/nagios/plugins
+    networks:
+      - rabbitmq
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+networks:
+  rabbitmq:
+    driver: bridge
