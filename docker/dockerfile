@@ -27,4 +27,4 @@ RUN cpanm install JSON;
 #     - once CMD is added the rabbit server won't start itself
 #   - waiting for rabbit server to start (thus sleep)
 #   - then running endlessly in while loop because otherwise container dies when cmd is executed
-CMD rabbitmq-server -detached && sleep 10 && rabbitmqctl set_policy remove-generic amq.gen* '{"expires": 1}' --priority 0 --apply-to queues && while true; do sleep 1; done;
+CMD rabbitmq-server -detached && sleep 60 && rabbitmqctl set_policy remove-generic amq.gen* '{"expires": 1}' --priority 0 --apply-to queues && while true; do sleep 1; done;
